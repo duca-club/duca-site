@@ -42,14 +42,14 @@ const featuredPosts = await Promise.all(
     let featuredImage: string | undefined = undefined
 
     if (post.data.featuredImage) {
-      const imageModule = await import(`../content/blog/${slugify(post.data.title)}/${post.data.featuredImage}`)
+      const imageModule = await import(`../content/blog/${post.data.slug}/${post.data.featuredImage}`)
       featuredImage = imageModule.default
     }
 
     return {
       ...post,
       featuredImage,
-      slug: slugify(post.data.title),
+      slug: post.data.slug,
     }
   })
 )
@@ -63,7 +63,7 @@ const featuredPosts = await Promise.all(
         featuredPosts.map((post) => (
           <Card
             imageComponent={post.featuredImage}
-            url={'/blog/' + post.slug}
+            url={'/blog/' + post.data.slug}
             headingLevel="h2"
             title={post.data.title}
             footer={'Author: ' + post.data.author}
