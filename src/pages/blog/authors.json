@@ -1,0 +1,12 @@
+{
+  "paige-haines": {
+    "name": "Paige Haines",
+    "image": "/authors/paige-haines.png",
+    "bio": "Cyber Security Analyst | Writer & Cat Enthusiast | AWSN & WiCyS"
+  },
+  "john-doe": {
+    "name": "John Doe",
+    "image": "/authors/john-doe.png",
+    "bio": "Frontend engineer and technical writer"
+  }
+}

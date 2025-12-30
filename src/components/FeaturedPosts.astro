@@ -4,11 +4,6 @@ import { Icon } from 'astro-icon/components'
 import { getCollection } from 'astro:content'
 import { slugify } from '@/utils/slugify'
 
-// Import images directly for optimization
-import postImage1 from '@assets/images/posts/post-image-1.png'
-import postImage2 from '@assets/images/posts/post-image-2.png'
-import postImage3 from '@assets/images/posts/post-image-3.png'
-
 /**
  * FeaturedPosts Component
  *
@@ -41,16 +36,23 @@ const sortedPosts = allPosts.sort((a, b) => {
   return b.data.publishDate.getTime() - a.data.publishDate.getTime()
 })
 
-const postImages = [postImage1, postImage2, postImage3]
-
 // Process and limit posts for featured section
-const featuredPosts = sortedPosts.slice(0, limit).map((post, index) => {
-  return {
-    ...post,
-    featuredImage: postImages[index % postImages.length],
-    slug: slugify(post.data.title),
-  }
-})
+const featuredPosts = await Promise.all(
+  sortedPosts.slice(0, limit).map(async (post) => {
+    let featuredImage: string | undefined = undefined
+
+    if (post.data.featuredImage) {
+      const imageModule = await import(`../content/blog/${slugify(post.data.title)}/${post.data.featuredImage}`)
+      featuredImage = imageModule.default
+    }
+
+    return {
+      ...post,
+      featuredImage,
+      slug: slugify(post.data.title),
+    }
+  })
+)
 ---
 
 <section class:list={[className, 'my-64']}>

@@ -4,46 +4,40 @@ import PageHeader from '@components/PageHeader.astro'
 import SocialShares from '@components/SocialShares.astro'
 import { Heading } from 'accessible-astro-components'
 import { getCollection, render } from 'astro:content'
-import type { CollectionEntry } from 'astro:content'
 import { slugify } from '@/utils/slugify'
+import authorsJson from './authors.json'
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog')
 
-  const postImages = [
-    { src: '/posts/post-image-1.png' },
-    { src: '/posts/post-image-2.png' },
-    { src: '/posts/post-image-3.png' },
-    { src: '/posts/post-image-4.png' },
-    { src: '/posts/post-image-5.png' },
-    { src: '/posts/post-image-6.png' },
-  ]
-
-  return posts.map((post, index) => {
-    const postWithImage = {
-      ...post,
-      featuredImage: postImages[index % postImages.length].src,
-      slug: slugify(post.data.title),
-    }
-
+  return posts.map((post) => {
+    const slug = slugify(post.data.title)
     return {
-      params: { post: postWithImage.slug },
-      props: { post: postWithImage },
+      params: { post: slug },
+      props: { post: { ...post, slug } },
     }
   })
-}
-
-interface Props {
-  post: CollectionEntry<'blog'> & { featuredImage: string; slug: string }
 }
 
 const { post } = Astro.props
 const { Content } = await render(post)
 
-const author = {
-  name: post.data.author,
-  image: '/posts/post-image-1.png',
-  bio: 'Accessibility advocate',
+// ----- Author -----
+type Author = {
+  name: string
+  image: string
+  bio: string
+}
+
+const authors = authorsJson as Record<string, Author>
+const author = authors[post.data.author]
+
+// ----- Hero Image -----
+let featuredImage: string | undefined = undefined
+if (post.data.featuredImage) {
+  // this path is mentioned relative to this file inside /src/pages/blog/
+  const imageModule = await import(`../../content/blog/${post.slug}/${post.data.featuredImage}`)
+  featuredImage = imageModule.default
 }
 ---
 
@@ -53,7 +47,7 @@ const author = {
     subtitle={post.data.description}
     author={author}
     bgType="bordered"
-    featuredImage={post.featuredImage}
+    featuredImage={featuredImage}
   />
   <section class="my-12">
     <div class="narrow space-content container">
