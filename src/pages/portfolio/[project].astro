@@ -8,7 +8,7 @@ import type { CollectionEntry } from 'astro:content'
 import projectImage1 from '@assets/images/projects/project-image-1.png'
 import projectImageJingle from '@assets/images/projects/JingleShellCTF.jpg'
 import { slugify } from '@/utils/slugify'
-import projectDucaAvatar from '@assets/images/projects/DUCAClub.png'
+import acucysLogo from '@assets/images/logos/acucys_logo.jpg'
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects')
@@ -48,8 +48,8 @@ const { Content } = await render(project)
 
 const author = {
   name: project.data.author,
-  image: (projectDucaAvatar && (projectDucaAvatar.src ?? projectDucaAvatar)) as any,
-  bio: 'Student Club',
+  image: (acucysLogo && (acucysLogo.src ?? acucysLogo)) as any,
+  bio: 'The Australian Council of University Cyber Societies',
 }
 ---
 
