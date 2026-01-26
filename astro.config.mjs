@@ -13,6 +13,11 @@ import { watch } from 'fs'
 const componentsPath = resolve('./node_modules/accessible-astro-components')
 const isLinked = existsSync(componentsPath) && lstatSync(componentsPath).isSymbolicLink()
 
+// Check if this is actually a workspace setup (not just pnpm's internal symlink)
+// by verifying the workspace directory exists
+const componentsRealPath = resolve('../accessible-astro-components')
+const isWorkspace = isLinked && existsSync(componentsRealPath) && existsSync(resolve(componentsRealPath, 'src/components'))
+
 // Base Vite config
 const viteConfig = {
   css: {
@@ -39,11 +44,9 @@ const viteConfig = {
   },
 }
 
-// Add workspace-specific config only when using symlinks
-if (isLinked) {
+// Add workspace-specific config only when using actual workspace setup
+if (isWorkspace) {
   console.log('Workspace detected - enabling auto-reload for locally linked components')
-
-  const componentsRealPath = resolve('../accessible-astro-components')
 
   // Essential config for symlinked packages
   viteConfig.resolve.preserveSymlinks = true
