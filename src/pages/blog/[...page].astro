@@ -7,6 +7,9 @@ import type { GetStaticPaths } from 'astro'
 import authorsJson from './_authors.json'
 
 export const getStaticPaths = (async ({ paginate }) => {
+  // Pre-import all blog images using glob pattern
+  const blogImages = import.meta.glob('../../content/blog/**/*.{png,jpg,jpeg,webp}', { eager: true, import: 'default' })
+  
   const posts = await getCollection('blog')
   
   
@@ -15,22 +18,20 @@ export const getStaticPaths = (async ({ paginate }) => {
     return b.data.publishDate.getTime() - a.data.publishDate.getTime()
   })
 
-  const postsWithImages = await Promise.all(
-    sortedPosts.map(async (post) => {
-      let featuredImage: string | undefined
+  const postsWithImages = sortedPosts.map((post) => {
+    let featuredImage: string | undefined
 
-      if (post.data.featuredImage) {
-        const imageModule = await import(/* @vite-ignore */ `../../content/blog/${post.data.slug}/${post.data.featuredImage}`)
-        featuredImage = imageModule.default
-      }
+    if (post.data.featuredImage) {
+      const imageKey = `../../content/blog/${post.data.slug}/${post.data.featuredImage}`
+      featuredImage = blogImages[imageKey] as string | undefined
+    }
 
-      return {
-        ...post,
-        featuredImage,
-        slug: post.data.slug,
-      }
-    })
-  )
+    return {
+      ...post,
+      featuredImage,
+      slug: post.data.slug,
+    }
+  })
 
   return paginate(postsWithImages, {
     pageSize: 6,

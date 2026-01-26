@@ -6,6 +6,9 @@ import { Heading } from 'accessible-astro-components'
 import { getCollection, render } from 'astro:content'
 import authorsJson from './_authors.json'
 
+// Pre-import all blog images using glob pattern
+const blogImages = import.meta.glob('../../content/blog/**/*.{png,jpg,jpeg,webp}', { eager: true, import: 'default' })
+
 export async function getStaticPaths() {
   const posts = await getCollection('blog')
 
@@ -35,8 +38,8 @@ const author = authors[post.data.author]
 let featuredImage: string | undefined = undefined
 if (post.data.featuredImage) {
   // this path is mentioned relative to this file inside /src/pages/blog/
-  const imageModule = await import(/* @vite-ignore */ `../../content/blog/${post.data.slug}/${post.data.featuredImage}`)
-  featuredImage = imageModule.default
+  const imageKey = `../../content/blog/${post.data.slug}/${post.data.featuredImage}`
+  featuredImage = blogImages[imageKey] as string | undefined
 }
 ---
 

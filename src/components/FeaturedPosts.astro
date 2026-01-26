@@ -35,6 +35,9 @@ type Author = {
 }
 const authors = authorsJson as Record<string, Author>
 
+// Pre-import all blog images using glob pattern
+const blogImages = import.meta.glob('../content/blog/**/*.{png,jpg,jpeg,webp}', { eager: true, import: 'default' })
+
 // Get posts from content collection
 const allPosts = await getCollection('blog')
 
@@ -44,26 +47,25 @@ const sortedPosts = allPosts.sort((a, b) => {
 })
 
 // Process and limit posts for featured section
-const featuredPosts = await Promise.all(
-  sortedPosts.slice(0, limit).map(async (post) => {
-    let featuredImage: string | undefined = undefined
+const featuredPosts = sortedPosts.slice(0, limit).map((post) => {
+  let featuredImage: string | undefined = undefined
 
-    if (post.data.featuredImage) {
-      const imageModule = await import(/* @vite-ignore */ `../content/blog/${post.data.slug}/${post.data.featuredImage}`)
-      featuredImage = imageModule.default
-    }
+  if (post.data.featuredImage) {
+    // Resolve the image path relative to the content directory
+    const imageKey = `../content/blog/${post.data.slug}/${post.data.featuredImage}`
+    featuredImage = blogImages[imageKey] as string | undefined
+  }
 
-    const author = authors[post.data.author]
-    const authorName = author ? author.name : post.data.author
+  const author = authors[post.data.author]
+  const authorName = author ? author.name : post.data.author
 
-    return {
-      ...post,
-      featuredImage,
-      slug: post.data.slug,
-      authorName,
-    }
-  })
-)
+  return {
+    ...post,
+    featuredImage,
+    slug: post.data.slug,
+    authorName,
+  }
+})
 ---
 
 <section class:list={[className, 'my-64']}>
